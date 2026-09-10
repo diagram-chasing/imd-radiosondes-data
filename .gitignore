@@ -10,3 +10,6 @@ __pycache__/
 
 # Fetch state. Rebuilt by any run and specific to one working copy.
 data/manifest.json
+
+# Backfill progress log
+backfill.log

@@ -10,21 +10,21 @@ import re
 from datetime import datetime, time, timedelta
 
 # Reasons the portal records against an ascent that produced no data. MISDA is the
-# portal's own abbreviation for missing data. Codes outside this table are published
-# unchanged, with no description.
+# portal's own abbreviation for missing data. A code outside this table passes through
+# unchanged and carries no description.
 MISDA_REASONS = {
-    "NONE": "The ascent produced data; no failure was recorded",
-    "NIL": "No entry was filed for this station and slot",
+    "NONE": "The ascent produced data, and the station recorded no failure",
+    "NIL": "The station filed no entry for this slot",
     "NOINSTRUMENTS": "The station held no radiosondes",
     "NOBALLOONS": "The station held no balloons",
-    "NOCHEMICALS": "The station held none of the chemicals used to generate lift gas",
+    "NOCHEMICALS": "The station held none of the chemicals that generate lift gas",
     "NOBATTERIES": "The station held no batteries",
     "GNDEQUIPFAULT": "The ground receiving equipment was faulty",
-    "SIGNALFAIL": "The instrument's signal was lost or never acquired",
+    "SIGNALFAIL": "The station lost the instrument's signal, or never acquired it",
     "METELEMENTFAIL": "A meteorological sensor on the instrument failed",
     "DATADOUBTFUL": "The ascent produced data the station did not trust",
-    "ASCENTSUSPEND": "Ascents at this station were suspended",
-    "OTHERS": "A reason outside the coded list, which the portal does not state",
+    "ASCENTSUSPEND": "The station had suspended its ascents",
+    "OTHERS": "A reason outside the coded list, which the source does not state",
 }
 
 # The bands the flight status report groups its stations under. The heading names the
@@ -42,11 +42,11 @@ REPORT_SECTIONS = {
 }
 
 # The thirteen numeric columns of the consumable stock report, in the order the report
-# lays them out. Confirmed against the column-group spans in the report header: five
+# lays them out. The column-group spans in the report header confirm the grouping: five
 # instrument types, three balloon types, one unqualified column each for thread,
-# batteries and targets, then two chemicals. The instrument and balloon type names are
-# the report's own and are not expanded here, because the report does not say what they
-# stand for.
+# batteries and targets, then two chemicals. The instrument and balloon type names belong
+# to the report, which never says what they stand for, so this module leaves them as
+# they are.
 COMMODITY_COLUMNS = (
     "instruments_mk_3",
     "instruments_mk_4",
@@ -63,7 +63,7 @@ COMMODITY_COLUMNS = (
     "chemicals_ferro_silicon",
 )
 
-# Text the portal repeats as page furniture on every report. None of it names a station.
+# Text the portal repeats on every report. None of it names a station.
 PAGE_FURNITURE = {
     "DITUAL",
     "INDIA METEOROLOGICAL DEPARTMENT",
@@ -100,9 +100,9 @@ def _number(text):
 
     The portal writes 0.0 rather than leaving a cell blank. No height, pressure or
     temperature in this report can legitimately be zero: an ascent that reached zero
-    geopotential metres did not happen, and the 100 hPa surface is never at 0 degrees
-    Celsius. Publishing these as measurements of zero would misstate the record, so they
-    are returned as absent instead.
+    geopotential metres never happened, and the 100 hPa surface never sits at 0 degrees
+    Celsius. Reporting those as measurements would misstate the record, so this function
+    returns them as absent.
 
     Args:
         text: The cell's text.
@@ -139,9 +139,9 @@ def _release_time(text):
 def _release_utc(day, released):
     """Converts a release clock time in IST to an instant in UTC.
 
-    A balloon flown for the 00 UTC slot is released the previous evening in UTC, and one
-    flown for 12 UTC is released the same morning. Subtracting the fixed IST offset from
-    the slot's own date yields both cases without a special case for either.
+    A station flying the 00 UTC slot releases its balloon the previous evening in UTC,
+    and a station flying 12 UTC releases the same morning. Subtracting the fixed IST
+    offset from the slot's own date covers both without a special case for either.
 
     Args:
         day: A `datetime.date` naming the observation date in UTC.
@@ -185,10 +185,10 @@ def parse_flight_status(markup, day, hour):
             "temperature_at_100_hpa_celsius": _number(row[8]),
         }
 
-        # A row with nothing in any measured column records an ascent that did not
-        # happen, and its release time is the slot's own clock time standing in for a
-        # blank. Elsewhere those same clock times are genuine: Patiala released at 17:30
-        # on 2026-09-10 and flew for 105 minutes.
+        # A row with nothing in any measured column records an ascent that never
+        # happened, and the portal fills its release column with the slot's own clock
+        # time instead of a blank. Those clock times are genuine elsewhere: Patiala
+        # released at 17:30 on 2026-09-10 and flew for 105 minutes.
         released = _release_time(row[1])
         if all(value is None for value in measurements.values()):
             released = None
@@ -210,9 +210,9 @@ def parse_flight_status(markup, day, hour):
 def parse_ground_status(markup):
     """Reads the ground equipment class recorded against each station.
 
-    The report is a live snapshot of the most recent slot, so the result is keyed by
-    station and release time. Matching on both keeps the class from being attached to an
-    ascent it does not describe.
+    The report is a live snapshot of the most recent slot, so this function keys the
+    result by station and release time. Matching on both keeps the class off an ascent it
+    does not describe.
 
     Args:
         markup: The text returned by `fetch.ground_status`.
@@ -236,9 +236,9 @@ def parse_ground_status(markup):
 def parse_consumable_stock(markup, day):
     """Reads the consumable stock report for one date.
 
-    Stations that file no return at all appear as a single spanning cell rather than a row
-    of figures, and are omitted. This is distinct from a station that files a return of
-    zero, which is recorded as zero.
+    A station that files no return at all appears as a single spanning cell rather than a
+    row of figures, and this function skips it. That differs from a station which returns
+    zero, and which the table records as zero.
 
     Args:
         markup: The text returned by `fetch.consumable_stock`.
@@ -254,8 +254,8 @@ def parse_consumable_stock(markup, day):
         record = {"report_date": day, "station_name": row[0].strip().upper()}
         for column, cell in zip(COMMODITY_COLUMNS, row[1:]):
             try:
-                # A zero here is a genuine reading. A station holding no radiosondes is
-                # the reason the flight status report shows it failing every morning.
+                # Keep a zero. It is a real return, not a missing value, and it is why
+                # the flight status report shows that station failing every morning.
                 record[column] = int(float(cell))
             except ValueError:
                 record[column] = None

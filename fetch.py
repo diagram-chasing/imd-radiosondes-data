@@ -1,9 +1,8 @@
 """HTTP access to the India Meteorological Department upper-air monitoring portal.
 
-The portal at https://ddgmui.imd.gov.in/ual is operated by IMD's Upper Air Instruments
-Division. It is unauthenticated, undocumented, and not linked from IMD's main site. Every
-function in this module returns the page markup unchanged. Interpreting that markup is the
-work of `parse`.
+IMD's Upper Air Instruments Division operates the portal at https://ddgmui.imd.gov.in/ual.
+It requires no authentication, carries no documentation, and IMD's main site does not link
+to it. Every function here returns the page markup unchanged; `parse` interprets it.
 """
 
 import time
@@ -13,16 +12,16 @@ import httpx
 
 BASE = "https://ddgmui.imd.gov.in/ual2"
 
-# The synoptic observation slots the network files. Every station attempts 00 UTC year
-# round; a subset also attempts 12 UTC, at several stations only during summer.
+# Observation slots the network files. Every station attempts 00 UTC year round. A
+# subset also attempts 12 UTC, and several of those stations fly it only in summer.
 SLOTS = (0, 12)
 
-# The earliest date the portal serves. Requests for 2008 and earlier return the report
-# scaffolding with no station rows.
+# Earliest date the portal serves. A request for 2008 or earlier returns the report
+# scaffolding and no station rows.
 ARCHIVE_START = date(2009, 1, 1)
 
-# A complete backfill issues on the order of nineteen thousand requests against a small
-# departmental server. The courtesy delay is deliberate; do not remove it.
+# Delay between requests. A complete backfill sends about 19,000 of them to a small
+# departmental server, so this stays in place.
 REQUEST_DELAY_SECONDS = 1.5
 
 RETRY_ATTEMPTS = 6
@@ -51,10 +50,10 @@ def slot_parameter(day, hour):
 def new_client():
     """Opens an HTTP client configured for the portal.
 
-    The portal presents a certificate that does not validate against the public trust
-    store, so verification is disabled. The connection carries no credentials and the
-    material it returns is published for unrestricted use, so the exposure is limited to
-    the integrity of a public report.
+    The portal presents a certificate that fails to validate against the public trust
+    store, so this client skips verification. The connection carries no credentials and
+    the portal publishes its reports for unrestricted use, which limits the risk to the
+    integrity of a public report.
 
     Returns:
         An `httpx.Client` that callers are responsible for closing.
@@ -130,8 +129,8 @@ def ground_status(client):
     """Retrieves the ground equipment report for the most recent slot.
 
     This endpoint accepts a `d` parameter but ignores it: a request for a date in 2023
-    returns the same content as a request for today. The report is therefore a live
-    snapshot and cannot be backfilled.
+    returns the same content as a request for today. The report is a live snapshot, so
+    you cannot backfill it.
 
     Args:
         client: An open `httpx.Client`.

@@ -1,13 +1,13 @@
 """The station registry for the upper-air network.
 
-The monitoring portal identifies stations by name alone. It publishes no coordinates, no
-WMO number and no elevation. Those are resolved here against the station list of NOAA's
+The monitoring portal identifies stations by name alone, and publishes no coordinates, no
+WMO number and no elevation. This module resolves those against the station list of NOAA's
 Integrated Global Radiosonde Archive, which carries the same stations under its own
 spellings.
 
-The registry is therefore the one part of this dataset that is not drawn entirely from
-IMD. Every coordinate published in `data/stations.csv` and `data/stations.geojson` comes
-from `reference/igra2-station-list.txt`, an unmodified copy of the NOAA file.
+The registry is the one part of this dataset that does not come entirely from IMD. Every
+coordinate in `data/stations.csv` and `data/stations.geojson` traces back to
+`reference/igra2-station-list.txt`, an unmodified copy of the NOAA file.
 """
 
 import json
@@ -17,8 +17,8 @@ import polars as pl
 
 IGRA_LIST = Path("reference/igra2-station-list.txt")
 
-# Fixed-width field positions in the IGRA version 2 station list, as documented in the
-# archive's own readme.
+# Fixed-width field positions in the IGRA version 2 station list, which the archive's
+# own readme documents.
 IGRA_FIELDS = {
     "igra_id": (0, 11),
     "latitude": (12, 20),
@@ -27,21 +27,21 @@ IGRA_FIELDS = {
     "igra_name": (41, 71),
 }
 
-# The bounding box of India and its island territories, used to reject a coordinate that
-# cannot be right. Maitri, IMD's Antarctic station, falls outside it legitimately and is
-# excluded from the test by name.
+# Bounding box of India and its island territories. It rejects a coordinate that cannot
+# be right. Maitri, IMD's Antarctic station, falls outside it legitimately, so the test
+# skips that station by name.
 INDIA_BOUNDS = (5.0, 38.0, 68.0, 98.0)
 
 OUTSIDE_INDIA = {"MAITRI"}
 
 # The archive files Kavali under country code UV and at longitude 0.008. Both are wrong.
-# The record is admitted by identifier so that the station's WMO number is still
-# published; its coordinate is rejected by the plausibility test below.
+# This module admits the record by identifier to keep the station's WMO number, and the
+# plausibility test below rejects its coordinate.
 MISFILED_ENTRIES = {"UVM00043243"}
 
-# The portal's spellings mapped to the archive's. Where the two agree, no entry is
-# needed. Where the archive appends a bracketed identifier or an airport name, prefix
-# matching resolves it without an entry here.
+# The portal's spellings mapped to the archive's. Where the two agree, this table needs
+# no entry. Where the archive appends a bracketed identifier or an airport name, prefix
+# matching resolves the station without one.
 STATION_ALIASES = {
     "AHMEDABAD": "AHMADABAD",
     "BANGALORE": "BENGALURU",
@@ -125,9 +125,9 @@ def read_igra_list(path=IGRA_LIST):
 def _plausible(name, latitude, longitude):
     """Tests whether a coordinate can belong to the named station.
 
-    The archive carries at least one corrupt Indian record: Kavali is listed at a
-    longitude of 0.008, which places it in the Atlantic. A station that fails this test
-    is published without coordinates rather than at a false position.
+    The archive carries at least one corrupt Indian record: it lists Kavali at longitude
+    0.008, which falls in the Atlantic. The registry publishes a station that fails this
+    test without coordinates rather than at a false position.
 
     Args:
         name: The portal's station name.
@@ -148,9 +148,10 @@ def _plausible(name, latitude, longitude):
 def _match(name, entries):
     """Finds the archive entry for one portal station name.
 
-    Matching is by exact name first, then by prefix, because the archive appends airport
-    names and bracketed identifiers to some entries. The archive's own end-year field is
-    deliberately not consulted: it reads 2010 for Chennai, which launches twice a day.
+    This function matches on the exact name first and then on a prefix, because the
+    archive appends airport names and bracketed identifiers to some entries. It ignores
+    the archive's end-year field, which reads 2010 for Chennai, a station that launches
+    twice a day.
 
     Args:
         name: The portal's station name.
@@ -209,9 +210,9 @@ def build_registry(roster, entries):
 def write_stations(registry, root):
     """Writes the station registry as CSV and GeoJSON.
 
-    Stations whose coordinates could not be resolved appear in the CSV with empty
-    coordinate columns and are omitted from the GeoJSON, which cannot represent a feature
-    without a position.
+    A station without coordinates appears in the CSV with those columns empty. GeoJSON
+    cannot represent a feature without a position, so this function leaves such a station
+    out of that file.
 
     Args:
         registry: The DataFrame returned by `build_registry`.

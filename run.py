@@ -1,16 +1,16 @@
 """Command line entry point for building and updating the dataset.
 
-Two commands are available. `backfill` walks the portal's archive from 2009 forward and
-skips any slot already recorded, so a run that is interrupted can be restarted where it
-stopped. `update` re-fetches a short trailing window, which is what keeps the most recent
-slots correct: the portal fills a slot in through the morning, so the first version of a
-day's report is not its final one.
+Run `backfill` to walk the portal's archive from 2009 forward. It skips any slot the
+dataset already holds, so you can interrupt it and restart where it stopped. Run `update`
+to re-read a short trailing window, which keeps the most recent slots accurate: the portal
+fills a slot in through the Indian morning, so a day's first report is not its final one.
 
-This is the only module that knows where the dataset is written or what state it keeps.
+This module alone knows where the dataset lands and what state it keeps.
 """
 
 import argparse
 import json
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -29,6 +29,16 @@ UPDATE_DAYS = 3
 
 # How many slots a backfill holds in memory before writing. See `_checkpoint`.
 CHECKPOINT_SLOTS = 200
+
+# The portal answers concurrent requests without slowing down, and its stock report takes
+# about fifteen seconds a page, so reading one slot at a time would run for days. Six
+# workers hold the combined rate below one request a second.
+WORKERS = 6
+
+# How recent a slot must be to take a ground equipment class from the live report. The
+# report describes only the most recent slot, so attaching it to an older one would
+# assert something the source never said.
+GROUND_MATCH_DAYS = 1
 
 ASCENT_KEYS = ("observation_date", "observation_hour_utc", "station_name")
 STOCK_KEYS = ("report_date", "station_name")
@@ -78,11 +88,11 @@ def save_manifest(manifest):
 
 
 def _upsert(frame, path, keys):
-    """Merges rows into one Parquet partition, replacing any that share a key.
+    """Merges rows into a Parquet file, replacing any that share a key.
 
     Args:
         frame: The rows to write.
-        path: The partition file.
+        path: The file to merge into.
         keys: The columns that identify a row.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -96,8 +106,9 @@ def _upsert(frame, path, keys):
 def write_table(frame, name, keys):
     """Merges rows into a table and writes both of its published forms.
 
-    Each table is one Parquet file and one CSV file. The CSV is written from the merged
-    Parquet contents rather than maintained separately, so the two cannot drift apart.
+    Each table is one Parquet file and one CSV file. This function writes the CSV from
+    the merged Parquet contents rather than maintaining it separately, so the two cannot
+    drift apart.
 
     Args:
         frame: The rows to write.
@@ -109,21 +120,23 @@ def write_table(frame, name, keys):
     pl.read_parquet(path).write_csv(DATA / f"{name}.csv")
 
 
-def _ascent_frame(records, registry, ground):
+def _ascent_frame(records, registry, ground, day):
     """Assembles one slot's ascents into a typed frame.
 
     Args:
         records: Dictionaries returned by `parse.parse_flight_status`.
-        registry: The station registry, used to attach WMO numbers.
+        registry: Station names mapped to WMO numbers.
         ground: The mapping returned by `parse.parse_ground_status`.
+        day: The observation date, used to decide whether the ground equipment report
+            can describe this slot.
 
     Returns:
         A polars DataFrame matching `ASCENT_SCHEMA`.
     """
+    recent = day >= date.today() - timedelta(days=GROUND_MATCH_DAYS)
     for record in records:
         record["ground_equipment"] = ground.get(
-            (record["station_name"], record["release_time_ist"])
-        )
+            (record["station_name"], record["release_time_ist"])) if recent else None
         record["wmo_id"] = registry.get(record["station_name"])
     return pl.DataFrame(records, schema=ASCENT_SCHEMA)
 
@@ -164,8 +177,8 @@ def run(start, end, limit, skip_recorded):
     print(f"registry: {registry.height} stations, "
           f"{registry.filter(registry['latitude'].is_not_null()).height} located")
 
-    # The ground equipment report is a live snapshot that ignores its date parameter, so
-    # it is read once per run and matched to ascents by station and release time.
+    # The ground equipment report ignores its date parameter and describes only the
+    # latest slot, so read it once and match it to ascents by station and release time.
     try:
         ground = parse.parse_ground_status(fetch.ground_status(client))
     except RuntimeError as error:
@@ -179,42 +192,64 @@ def run(start, end, limit, skip_recorded):
         slots = slots[:limit]
 
     ascents, stock, fetched = [], [], {}
-    for index, (day, hour) in enumerate(slots, 1):
-        key = f"{day:%Y%m%d}-{hour:02d}"
-        try:
-            records = parse.parse_flight_status(fetch.flight_status(client, day, hour),
-                                                day, hour)
-        except RuntimeError as error:
-            print(f"[{index}/{len(slots)}] {key}: SKIPPED ({error})")
-            continue
+    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        pages = pool.map(lambda slot: _read_slot(client, *slot), slots)
+        for index, (day, hour, report, returns, error) in enumerate(pages, 1):
+            key = f"{day:%Y%m%d}-{hour:02d}"
+            if error is not None:
+                print(f"[{index}/{len(slots)}] {key}: SKIPPED ({error})")
+                continue
 
-        if records:
-            ascents.append(_ascent_frame(records, wmo, ground))
-        flown = sum(r["ascent_completed"] for r in records)
-        print(f"[{index}/{len(slots)}] {key}: {len(records)} ascents, {flown} flown")
-        fetched[key] = datetime.now().isoformat(timespec="seconds")
+            records = parse.parse_flight_status(report, day, hour)
+            if records:
+                ascents.append(_ascent_frame(records, wmo, ground, day))
+            flown = sum(r["ascent_completed"] for r in records)
+            print(f"[{index}/{len(slots)}] {key}: {len(records)} ascents, {flown} flown")
+            fetched[key] = datetime.now().isoformat(timespec="seconds")
 
-        # Stock is reported once a day, not once a slot, so it is read on the first slot.
-        if hour == fetch.SLOTS[0]:
-            stock_key = f"{day:%Y%m%d}-stock"
-            try:
-                returns = parse.parse_consumable_stock(
-                    fetch.consumable_stock(client, day), day)
-            except RuntimeError as error:
-                print(f"    stock {stock_key}: SKIPPED ({error})")
-                returns = []
-            if returns:
-                stock.append(pl.DataFrame(returns, schema=STOCK_SCHEMA))
-                fetched[stock_key] = datetime.now().isoformat(timespec="seconds")
+            if returns is not None:
+                rows = parse.parse_consumable_stock(returns, day)
+                if rows:
+                    stock.append(pl.DataFrame(rows, schema=STOCK_SCHEMA))
+                    fetched[f"{day:%Y%m%d}-stock"] = fetched[key]
 
-        # Each table is a single file, so rewriting it after every slot would dominate a
-        # long backfill. Rows are held until a checkpoint, and the manifest advances only
-        # once they are on disk, so an interrupted run re-reads at most this many slots.
-        if index % CHECKPOINT_SLOTS == 0:
-            _checkpoint(ascents, stock, manifest, fetched)
+            # Each table is a single file, so rewriting it after every slot would
+            # dominate a long backfill. The loop holds rows until a checkpoint and
+            # advances the manifest only after they reach disk, so an interrupted run
+            # re-reads at most this many slots.
+            if index % CHECKPOINT_SLOTS == 0:
+                _checkpoint(ascents, stock, manifest, fetched)
 
     _checkpoint(ascents, stock, manifest, fetched)
     client.close()
+
+
+def _read_slot(client, day, hour):
+    """Reads the reports one observation slot needs.
+
+    The portal reports stock once a day rather than once a slot, so only the first slot of
+    each day asks for it.
+
+    Args:
+        client: An open `httpx.Client`.
+        day: A `datetime.date` naming the observation date in UTC.
+        hour: The slot hour in UTC.
+
+    Returns:
+        A tuple of the date, the hour, the flight status markup, the stock markup or None,
+        and the error that stopped the flight status request or None.
+    """
+    try:
+        report = fetch.flight_status(client, day, hour)
+    except RuntimeError as error:
+        return day, hour, None, None, error
+    returns = None
+    if hour == fetch.SLOTS[0]:
+        try:
+            returns = fetch.consumable_stock(client, day)
+        except RuntimeError as error:
+            print(f"    stock {day:%Y%m%d}: SKIPPED ({error})")
+    return day, hour, report, returns, None
 
 
 def _checkpoint(ascents, stock, manifest, fetched):
