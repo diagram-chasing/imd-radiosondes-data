@@ -1,0 +1,12 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+
+# Virtual environments
+.venv
+
+# macOS directory metadata
+.DS_Store
+
+# Fetch state. Rebuilt by any run and specific to one working copy.
+data/manifest.json

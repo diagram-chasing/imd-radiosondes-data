@@ -1,0 +1,977 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     91.25,
+     23.8833
+    ]
+   },
+   "properties": {
+    "station_name": "AGARTALA",
+    "wmo_id": 42724,
+    "igra_id": "INM00042724",
+    "igra_name": "AGARTALA",
+    "elevation_m": 16.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     72.6333,
+     23.0667
+    ]
+   },
+   "properties": {
+    "station_name": "AHMEDABAD",
+    "wmo_id": 42647,
+    "igra_id": "INM00042647",
+    "igra_name": "AHMADABAD",
+    "elevation_m": 55.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     72.7333,
+     11.1167
+    ]
+   },
+   "properties": {
+    "station_name": "AMINIDIVI",
+    "wmo_id": 43311,
+    "igra_id": "INM00043311",
+    "igra_name": "AMINIDIVI",
+    "elevation_m": 2.7,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     77.5833,
+     12.9667
+    ]
+   },
+   "properties": {
+    "station_name": "BANGALORE",
+    "wmo_id": 43295,
+    "igra_id": "INM00043295",
+    "igra_name": "BENGALURU",
+    "elevation_m": 916.6,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     87.0833,
+     23.3833
+    ]
+   },
+   "properties": {
+    "station_name": "BANKURA",
+    "wmo_id": 42706,
+    "igra_id": "INM00042706",
+    "igra_name": "BANKURA",
+    "elevation_m": 100.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     77.35,
+     23.2833
+    ]
+   },
+   "properties": {
+    "station_name": "BHOPAL",
+    "wmo_id": 42667,
+    "igra_id": "INM00042667",
+    "igra_name": "BHOPAL/BAIRAGHAR",
+    "elevation_m": 522.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     85.8333,
+     20.25
+    ]
+   },
+   "properties": {
+    "station_name": "BHUBANESWAR",
+    "wmo_id": 42971,
+    "igra_id": "INM00042971",
+    "igra_name": "BHUBANESHWAR",
+    "elevation_m": 45.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     69.8,
+     23.25
+    ]
+   },
+   "properties": {
+    "station_name": "BHUJ",
+    "wmo_id": 42634,
+    "igra_id": "INM00042634",
+    "igra_name": "BHUJ-RUDRAMATA",
+    "elevation_m": 118.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     80.1833,
+     13.0
+    ]
+   },
+   "properties": {
+    "station_name": "CHENNAI",
+    "wmo_id": 43279,
+    "igra_id": "INM00043279",
+    "igra_name": "MADRAS/MINAMBAKKAM",
+    "elevation_m": 10.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     75.4,
+     19.85
+    ]
+   },
+   "properties": {
+    "station_name": "CHIKALTHANA",
+    "wmo_id": 43014,
+    "igra_id": "INM00043014",
+    "igra_name": "AURANGABAD AIRPORT",
+    "elevation_m": 582.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     78.0833,
+     30.2833
+    ]
+   },
+   "properties": {
+    "station_name": "DEHRADUN",
+    "wmo_id": 42111,
+    "igra_id": "INM00042111",
+    "igra_name": "DEHRADUN",
+    "elevation_m": 644.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     77.2,
+     28.5833
+    ]
+   },
+   "properties": {
+    "station_name": "DELHI",
+    "wmo_id": 42182,
+    "igra_id": "INM00042182",
+    "igra_name": "NEW DELHI/SAFDARJUNG",
+    "elevation_m": 211.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     75.6333,
+     15.4167
+    ]
+   },
+   "properties": {
+    "station_name": "GADAG",
+    "wmo_id": 43201,
+    "igra_id": "INM00043201",
+    "igra_name": "GADAG",
+    "elevation_m": 668.8,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     88.6167,
+     27.3333
+    ]
+   },
+   "properties": {
+    "station_name": "GANGTOK",
+    "wmo_id": 42299,
+    "igra_id": "INM00042299",
+    "igra_name": "GANGTOK",
+    "elevation_m": 1756.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     73.8167,
+     15.4833
+    ]
+   },
+   "properties": {
+    "station_name": "GOA",
+    "wmo_id": 43192,
+    "igra_id": "INM00043192",
+    "igra_name": "GOA/PANJIM",
+    "elevation_m": 59.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     84.8833,
+     19.2667
+    ]
+   },
+   "properties": {
+    "station_name": "GOPALPUR",
+    "wmo_id": 43049,
+    "igra_id": "INM00043049",
+    "igra_name": "GOPALPUR",
+    "elevation_m": 16.4,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     83.3667,
+     26.75
+    ]
+   },
+   "properties": {
+    "station_name": "GORAKHPUR",
+    "wmo_id": 42379,
+    "igra_id": "INM00042379",
+    "igra_name": "GORAKHPUR",
+    "elevation_m": 78.3,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     91.5833,
+     26.1
+    ]
+   },
+   "properties": {
+    "station_name": "GUWAHATI",
+    "wmo_id": 42410,
+    "igra_id": "INM00042410",
+    "igra_name": "GUWAHATI",
+    "elevation_m": 54.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     78.25,
+     26.2333
+    ]
+   },
+   "properties": {
+    "station_name": "GWALIOR",
+    "wmo_id": 42361,
+    "igra_id": "INM00042361",
+    "igra_name": "GWALIOR",
+    "elevation_m": 205.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     78.4667,
+     17.45
+    ]
+   },
+   "properties": {
+    "station_name": "HYDERABAD",
+    "wmo_id": 43128,
+    "igra_id": "INM00043128",
+    "igra_name": "HYDERABAD AIRPORT",
+    "elevation_m": 530.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     93.9,
+     24.7667
+    ]
+   },
+   "properties": {
+    "station_name": "IMPHAL",
+    "wmo_id": 42623,
+    "igra_id": "INM00042623",
+    "igra_name": "IMPHAL/TULIHAL",
+    "elevation_m": 781.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     79.95,
+     23.2
+    ]
+   },
+   "properties": {
+    "station_name": "JABALPUR",
+    "wmo_id": 42675,
+    "igra_id": "INM00042675",
+    "igra_name": "JABALPUR",
+    "elevation_m": 397.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     82.0333,
+     19.0833
+    ]
+   },
+   "properties": {
+    "station_name": "JAGDALPUR",
+    "wmo_id": 43041,
+    "igra_id": "INM00043041",
+    "igra_name": "JAGDALPUR",
+    "elevation_m": 554.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     75.8,
+     26.8167
+    ]
+   },
+   "properties": {
+    "station_name": "JAIPUR",
+    "wmo_id": 42348,
+    "igra_id": "INM00042348",
+    "igra_name": "JAIPUR / SANGANER",
+    "elevation_m": 383.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     88.7167,
+     26.5333
+    ]
+   },
+   "properties": {
+    "station_name": "JALPAIGURI",
+    "wmo_id": 42399,
+    "igra_id": "INM00042399",
+    "igra_name": "JALPAIGURI",
+    "elevation_m": 83.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     74.8333,
+     32.6667
+    ]
+   },
+   "properties": {
+    "station_name": "JAMMU",
+    "wmo_id": 42056,
+    "igra_id": "INM00042056",
+    "igra_name": "JAMMU",
+    "elevation_m": 415.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     84.0833,
+     21.9167
+    ]
+   },
+   "properties": {
+    "station_name": "JHARSIGUDA",
+    "wmo_id": 42886,
+    "igra_id": "INM00042886",
+    "igra_name": "JHARSIGUDA",
+    "elevation_m": 228.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     73.0167,
+     26.3
+    ]
+   },
+   "properties": {
+    "station_name": "JODHPUR",
+    "wmo_id": 42339,
+    "igra_id": "INM00042339",
+    "igra_name": "JODHPUR",
+    "elevation_m": 217.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     79.8333,
+     10.9167
+    ]
+   },
+   "properties": {
+    "station_name": "KARAIKAL",
+    "wmo_id": 43346,
+    "igra_id": "INM00043346",
+    "igra_name": "KARAIKAL",
+    "elevation_m": 6.9,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     76.2667,
+     9.95
+    ]
+   },
+   "properties": {
+    "station_name": "KOCHI",
+    "wmo_id": 43353,
+    "igra_id": "INM00043353",
+    "igra_name": "COCHIN/WILLINGDON",
+    "elevation_m": 1.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     88.45,
+     22.65
+    ]
+   },
+   "properties": {
+    "station_name": "KOLKATA",
+    "wmo_id": 42809,
+    "igra_id": "INM00042809",
+    "igra_name": "KOLKATA/DUM DUM",
+    "elevation_m": 6.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     92.6167,
+     23.8333
+    ]
+   },
+   "properties": {
+    "station_name": "LENGPUI",
+    "wmo_id": 42726,
+    "igra_id": "INM00042726",
+    "igra_name": "LENGPUI",
+    "elevation_m": 429.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     80.8833,
+     26.75
+    ]
+   },
+   "properties": {
+    "station_name": "LUCKNOW",
+    "wmo_id": 42369,
+    "igra_id": "INM00042369",
+    "igra_name": "LUCKNOW/AMAUSI",
+    "elevation_m": 122.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     81.15,
+     16.2
+    ]
+   },
+   "properties": {
+    "station_name": "MACHILIPATNAM",
+    "wmo_id": 43185,
+    "igra_id": "INM00043185",
+    "igra_name": "MACHILIPATNAM/FRANCHPET",
+    "elevation_m": 3.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     74.8333,
+     12.95
+    ]
+   },
+   "properties": {
+    "station_name": "MANGALORE",
+    "wmo_id": 43285,
+    "igra_id": "INM00043285",
+    "igra_name": "MANGALORE/PANAMBUR",
+    "elevation_m": 30.8,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     73.0581,
+     8.2813
+    ]
+   },
+   "properties": {
+    "station_name": "MINICOY",
+    "wmo_id": 43369,
+    "igra_id": "INM00043369",
+    "igra_name": "MINICOY",
+    "elevation_m": 1.8,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     95.0167,
+     27.4833
+    ]
+   },
+   "properties": {
+    "station_name": "MOHANBARI",
+    "wmo_id": 42314,
+    "igra_id": "INM00042314",
+    "igra_name": "DIBRUGARH /MOHANBARI",
+    "elevation_m": 112.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     72.85,
+     19.1167
+    ]
+   },
+   "properties": {
+    "station_name": "MUMBAI",
+    "wmo_id": 43003,
+    "igra_id": "INM00043003",
+    "igra_name": "BOMBAY / SANTACRUZ",
+    "elevation_m": 14.2,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     79.05,
+     21.1
+    ]
+   },
+   "properties": {
+    "station_name": "NAGPUR",
+    "wmo_id": 42867,
+    "igra_id": "INM00042867",
+    "igra_name": "NAGPUR SONEGAON",
+    "elevation_m": 310.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     95.3833,
+     28.1
+    ]
+   },
+   "properties": {
+    "station_name": "PASSIGHAT",
+    "wmo_id": 42220,
+    "igra_id": "INM00042220",
+    "igra_name": "PASIGHAT",
+    "elevation_m": 157.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     76.4667,
+     30.3333
+    ]
+   },
+   "properties": {
+    "station_name": "PATIALA",
+    "wmo_id": 42101,
+    "igra_id": "INM00042101",
+    "igra_name": "PATIALA",
+    "elevation_m": 251.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     85.1667,
+     25.6
+    ]
+   },
+   "properties": {
+    "station_name": "PATNA",
+    "wmo_id": 42492,
+    "igra_id": "INM00042492",
+    "igra_name": "PATNA",
+    "elevation_m": 51.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     92.7167,
+     11.6667
+    ]
+   },
+   "properties": {
+    "station_name": "PORTBLAIR",
+    "wmo_id": 43333,
+    "igra_id": "INM00043333",
+    "igra_name": "PORT BLAIR",
+    "elevation_m": 79.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     73.85,
+     18.5333
+    ]
+   },
+   "properties": {
+    "station_name": "PUNE",
+    "wmo_id": 43063,
+    "igra_id": "INM00043063",
+    "igra_name": "PUNE",
+    "elevation_m": 555.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     81.65,
+     21.2333
+    ]
+   },
+   "properties": {
+    "station_name": "RAIPUR",
+    "wmo_id": 42874,
+    "igra_id": "INM00042874",
+    "igra_name": "PBO RAIPUR",
+    "elevation_m": 296.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     79.4333,
+     18.7667
+    ]
+   },
+   "properties": {
+    "station_name": "RAMAGUNDAM",
+    "wmo_id": 43086,
+    "igra_id": "INM00043086",
+    "igra_name": "RAMGUNDAM",
+    "elevation_m": 156.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     85.3167,
+     23.3167
+    ]
+   },
+   "properties": {
+    "station_name": "RANCHI",
+    "wmo_id": 42701,
+    "igra_id": "INM00042701",
+    "igra_name": "M.O. RANCHI",
+    "elevation_m": 647.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     73.3333,
+     16.9833
+    ]
+   },
+   "properties": {
+    "station_name": "RATNAGIRI",
+    "wmo_id": 43110,
+    "igra_id": "INM00043110",
+    "igra_name": "RATNAGIRI",
+    "elevation_m": 91.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     91.8833,
+     25.5667
+    ]
+   },
+   "properties": {
+    "station_name": "SHILLONG",
+    "wmo_id": 42516,
+    "igra_id": "INM00042516",
+    "igra_name": "SHILLONG",
+    "elevation_m": 1598.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     73.8833,
+     29.9167
+    ]
+   },
+   "properties": {
+    "station_name": "SRIGANGANAGAR",
+    "wmo_id": 42123,
+    "igra_id": "INM00042123",
+    "igra_name": "GANGANAGAR",
+    "elevation_m": 173.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     74.8333,
+     34.0833
+    ]
+   },
+   "properties": {
+    "station_name": "SRINAGAR",
+    "wmo_id": 42027,
+    "igra_id": "INM00042027",
+    "igra_name": "SRINAGAR (42027-0)",
+    "elevation_m": 1585.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     76.9,
+     31.5333
+    ]
+   },
+   "properties": {
+    "station_name": "SUNDERNAGAR",
+    "wmo_id": 42079,
+    "igra_id": "INM00042079",
+    "igra_name": "SUNDERNAGAR",
+    "elevation_m": 874.0,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     76.95,
+     8.4833
+    ]
+   },
+   "properties": {
+    "station_name": "THIRUVANANTHAPURAM",
+    "wmo_id": 43371,
+    "igra_id": "INM00043371",
+    "igra_name": "THIRUVANANTHAPURAM (43371-0)",
+    "elevation_m": 59.7,
+    "in_network_roster": true
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     83.3,
+     17.6833
+    ]
+   },
+   "properties": {
+    "station_name": "VISAKHAPATNAM",
+    "wmo_id": 43150,
+    "igra_id": "INM00043150",
+    "igra_name": "VISHAKHAPATNAM/WALTAIR",
+    "elevation_m": -999.9,
+    "in_network_roster": true
+   }
+  }
+ ]
+}

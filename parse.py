@@ -1,0 +1,282 @@
+"""Interpretation of the upper-air monitoring portal's HTML report tables.
+
+The portal publishes no machine-readable format, so every report is read out of its
+markup. Each function here takes the text returned by a `fetch` function and returns
+plain dictionaries. Nothing in this module performs input or output.
+"""
+
+import html
+import re
+from datetime import datetime, time, timedelta
+
+# Reasons the portal records against an ascent that produced no data. MISDA is the
+# portal's own abbreviation for missing data. Codes outside this table are published
+# unchanged, with no description.
+MISDA_REASONS = {
+    "NONE": "The ascent produced data; no failure was recorded",
+    "NIL": "No entry was filed for this station and slot",
+    "NOINSTRUMENTS": "The station held no radiosondes",
+    "NOBALLOONS": "The station held no balloons",
+    "NOCHEMICALS": "The station held none of the chemicals used to generate lift gas",
+    "NOBATTERIES": "The station held no batteries",
+    "GNDEQUIPFAULT": "The ground receiving equipment was faulty",
+    "SIGNALFAIL": "The instrument's signal was lost or never acquired",
+    "METELEMENTFAIL": "A meteorological sensor on the instrument failed",
+    "DATADOUBTFUL": "The ascent produced data the station did not trust",
+    "ASCENTSUSPEND": "Ascents at this station were suspended",
+    "OTHERS": "A reason outside the coded list, which the portal does not state",
+}
+
+# The bands the flight status report groups its stations under. The heading names the
+# pressure the radiosonde reached, so it doubles as the source's own classification of
+# how far the ascent got. The final two bands hold ascents that produced no data.
+REPORT_SECTIONS = {
+    "Above 10 hPa": "ABOVE_10_HPA",
+    "Between 20 and 10 hPa": "BETWEEN_20_AND_10_HPA",
+    "Between 30 and 20 hPa": "BETWEEN_30_AND_20_HPA",
+    "Between 100 and 30 hPa": "BETWEEN_100_AND_30_HPA",
+    "Between 200 and 100 hPa": "BETWEEN_200_AND_100_HPA",
+    "Less than 200 hPa": "BELOW_200_HPA",
+    "MISDA [RS&RW]": "MISDA_RADIOSONDE_AND_RADIOWIND",
+    "Radio Wind [RS-Misda]": "MISDA_RADIOWIND",
+}
+
+# The thirteen numeric columns of the consumable stock report, in the order the report
+# lays them out. Confirmed against the column-group spans in the report header: five
+# instrument types, three balloon types, one unqualified column each for thread,
+# batteries and targets, then two chemicals. The instrument and balloon type names are
+# the report's own and are not expanded here, because the report does not say what they
+# stand for.
+COMMODITY_COLUMNS = (
+    "instruments_mk_3",
+    "instruments_mk_4",
+    "instruments_imdgps",
+    "instruments_fgps",
+    "instruments_others",
+    "balloons_pr875",
+    "balloons_chinese",
+    "balloons_others",
+    "thread",
+    "batteries",
+    "targets",
+    "chemicals_caustic_soda",
+    "chemicals_ferro_silicon",
+)
+
+# Text the portal repeats as page furniture on every report. None of it names a station.
+PAGE_FURNITURE = {
+    "DITUAL",
+    "INDIA METEOROLOGICAL DEPARTMENT",
+    "UPPER AIR OBSERVATORY MONITORING SYSTEM",
+    "UPPER AIR INSTRUMENTS DIVISION(UAL) - MONITORING SYSTEM",
+}
+
+IST_OFFSET = timedelta(hours=5, minutes=30)
+
+_CELL = re.compile(r"<t[dh][^>]*>(.*?)</t[dh]>", re.S | re.I)
+_ROW = re.compile(r"<tr[^>]*>(.*?)</tr>", re.S | re.I)
+_SCRIPT = re.compile(r"<(script|style)[^>]*>.*?</\1>", re.S | re.I)
+_TAG = re.compile(r"<[^>]+>")
+_SPACE = re.compile(r"\s+")
+
+
+def _rows(markup):
+    """Splits report markup into rows of plain cell text.
+
+    Args:
+        markup: The text of one portal report.
+
+    Returns:
+        A list of rows, each a list of whitespace-collapsed cell strings.
+    """
+    body = _SCRIPT.sub("", markup)
+    return [[_SPACE.sub(" ", html.unescape(_TAG.sub(" ", cell))).strip()
+             for cell in _CELL.findall(row)]
+            for row in _ROW.findall(body)]
+
+
+def _number(text):
+    """Reads one numeric cell, treating the report's zero as an absent measurement.
+
+    The portal writes 0.0 rather than leaving a cell blank. No height, pressure or
+    temperature in this report can legitimately be zero: an ascent that reached zero
+    geopotential metres did not happen, and the 100 hPa surface is never at 0 degrees
+    Celsius. Publishing these as measurements of zero would misstate the record, so they
+    are returned as absent instead.
+
+    Args:
+        text: The cell's text.
+
+    Returns:
+        The value as a float, or None if the cell is blank, unreadable or zero.
+    """
+    try:
+        value = float(text)
+    except ValueError:
+        return None
+    return None if value == 0.0 else value
+
+
+def _release_time(text):
+    """Reads a release time written as four digits of IST clock time.
+
+    Args:
+        text: The cell's text, such as `0433`.
+
+    Returns:
+        A `datetime.time`, or None if the cell does not hold a valid clock time.
+    """
+    digits = text.strip()
+    if not re.fullmatch(r"\d{3,4}", digits):
+        return None
+    digits = digits.zfill(4)
+    hour, minute = int(digits[:2]), int(digits[2:])
+    if hour > 23 or minute > 59:
+        return None
+    return time(hour, minute)
+
+
+def _release_utc(day, released):
+    """Converts a release clock time in IST to an instant in UTC.
+
+    A balloon flown for the 00 UTC slot is released the previous evening in UTC, and one
+    flown for 12 UTC is released the same morning. Subtracting the fixed IST offset from
+    the slot's own date yields both cases without a special case for either.
+
+    Args:
+        day: A `datetime.date` naming the observation date in UTC.
+        released: The release clock time in IST as a `datetime.time`.
+
+    Returns:
+        A naive `datetime.datetime` in UTC.
+    """
+    return datetime.combine(day, released) - IST_OFFSET
+
+
+def parse_flight_status(markup, day, hour):
+    """Reads the flight status report for one observation slot.
+
+    Args:
+        markup: The text returned by `fetch.flight_status`.
+        day: A `datetime.date` naming the observation date in UTC.
+        hour: The slot hour in UTC, either 0 or 12.
+
+    Returns:
+        A list of dictionaries, one per station that appears in the report.
+    """
+    records = []
+    section = None
+    for row in _rows(markup):
+        # A band heading stands alone on its own row, except for the first, which the
+        # report tucks into the last cell of the column header.
+        for cell in row:
+            section = REPORT_SECTIONS.get(cell.removesuffix("-Nil-").strip(), section)
+        if len(row) != 10 or not row[0] or row[0] == "Station":
+            continue
+
+        reason = row[9].strip().upper() or "NONE"
+        measurements = {
+            "flight_duration_minutes": _number(row[2]),
+            "radiosonde_maximum_height_pressure_hpa": _number(row[3]),
+            "radiosonde_maximum_height_gpm": _number(row[4]),
+            "radiowind_maximum_height_pressure_hpa": _number(row[5]),
+            "radiowind_maximum_height_km": _number(row[6]),
+            "height_at_100_hpa_gpm": _number(row[7]),
+            "temperature_at_100_hpa_celsius": _number(row[8]),
+        }
+
+        # A row with nothing in any measured column records an ascent that did not
+        # happen, and its release time is the slot's own clock time standing in for a
+        # blank. Elsewhere those same clock times are genuine: Patiala released at 17:30
+        # on 2026-09-10 and flew for 105 minutes.
+        released = _release_time(row[1])
+        if all(value is None for value in measurements.values()):
+            released = None
+
+        records.append({
+            "observation_date": day,
+            "observation_hour_utc": hour,
+            "station_name": row[0].strip().upper(),
+            "release_time_ist": released.strftime("%H:%M") if released else None,
+            "release_time_utc": _release_utc(day, released) if released else None,
+            **measurements,
+            "misda_reason": reason,
+            "ascent_completed": reason == "NONE",
+            "report_section": section,
+        })
+    return records
+
+
+def parse_ground_status(markup):
+    """Reads the ground equipment class recorded against each station.
+
+    The report is a live snapshot of the most recent slot, so the result is keyed by
+    station and release time. Matching on both keeps the class from being attached to an
+    ascent it does not describe.
+
+    Args:
+        markup: The text returned by `fetch.ground_status`.
+
+    Returns:
+        A dictionary mapping `(station_name, release_time_ist)` to an equipment class.
+    """
+    classes = {}
+    for row in _rows(markup):
+        if len(row) != 11 or not row[0] or row[0] == "Station":
+            continue
+        released = _release_time(row[2])
+        if released is None:
+            continue
+        equipment = row[1].strip().upper()
+        if equipment and equipment != "NONE":
+            classes[(row[0].strip().upper(), released.strftime("%H:%M"))] = equipment
+    return classes
+
+
+def parse_consumable_stock(markup, day):
+    """Reads the consumable stock report for one date.
+
+    Stations that file no return at all appear as a single spanning cell rather than a row
+    of figures, and are omitted. This is distinct from a station that files a return of
+    zero, which is recorded as zero.
+
+    Args:
+        markup: The text returned by `fetch.consumable_stock`.
+        day: A `datetime.date` naming the report date.
+
+    Returns:
+        A list of dictionaries, one per station, holding all thirteen stock columns.
+    """
+    records = []
+    for row in _rows(markup):
+        if len(row) != len(COMMODITY_COLUMNS) + 1 or not row[0] or row[0] == "Station":
+            continue
+        record = {"report_date": day, "station_name": row[0].strip().upper()}
+        for column, cell in zip(COMMODITY_COLUMNS, row[1:]):
+            try:
+                # A zero here is a genuine reading. A station holding no radiosondes is
+                # the reason the flight status report shows it failing every morning.
+                record[column] = int(float(cell))
+            except ValueError:
+                record[column] = None
+        records.append(record)
+    return records
+
+
+def parse_network_roster(markup):
+    """Reads the list of stations in the radiosonde and radiowind network.
+
+    Args:
+        markup: The text returned by `fetch.network_roster`.
+
+    Returns:
+        A sorted list of station names.
+    """
+    names = set()
+    for row in _rows(markup):
+        if len(row) != 1:
+            continue
+        name = row[0].strip().upper()
+        if re.fullmatch(r"[A-Z][A-Z .'&/-]{2,}", name) and name not in PAGE_FURNITURE:
+            names.add(name)
+    return sorted(names)
