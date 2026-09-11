@@ -10,6 +10,8 @@ Coverage:
 
 The data is scraped from the IMD Upper Air Instruments Division monitoring portal.
 
+Browse the dataset at [diagram-chasing.github.io/imd-radiosondes-data](https://diagram-chasing.github.io/imd-radiosondes-data/).
+
 ## Data files
 
 | File | Contents |
