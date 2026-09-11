@@ -2,6 +2,7 @@
   "name": "imd-radiosondes-site",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.17.0",
   "scripts": {
     "dev": "observable preview",
     "build": "observable build",
