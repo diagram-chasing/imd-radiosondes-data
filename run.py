@@ -204,7 +204,7 @@ def run(start, end, limit, skip_recorded):
             if records:
                 ascents.append(_ascent_frame(records, wmo, ground, day))
             flown = sum(r["ascent_completed"] for r in records)
-            print(f"[{index}/{len(slots)}] {key}: {len(records)} ascents, {flown} flown")
+            print(f"[{index}/{len(slots)}] {key}: {len(records)} rows, {flown} completed")
             fetched[key] = datetime.now().isoformat(timespec="seconds")
 
             if returns is not None:

@@ -9,23 +9,8 @@ import html
 import re
 from datetime import datetime, time, timedelta
 
-# Reasons the portal records against an ascent that produced no data. MISDA is the
-# portal's own abbreviation for missing data. A code outside this table passes through
-# unchanged and carries no description.
-MISDA_REASONS = {
-    "NONE": "The ascent produced data, and the station recorded no failure",
-    "NIL": "The station filed no entry for this slot",
-    "NOINSTRUMENTS": "The station held no radiosondes",
-    "NOBALLOONS": "The station held no balloons",
-    "NOCHEMICALS": "The station held none of the chemicals that generate lift gas",
-    "NOBATTERIES": "The station held no batteries",
-    "GNDEQUIPFAULT": "The ground receiving equipment was faulty",
-    "SIGNALFAIL": "The station lost the instrument's signal, or never acquired it",
-    "METELEMENTFAIL": "A meteorological sensor on the instrument failed",
-    "DATADOUBTFUL": "The ascent produced data the station did not trust",
-    "ASCENTSUSPEND": "The station had suspended its ascents",
-    "OTHERS": "A reason outside the coded list, which the source does not state",
-}
+# The MISDA column passes through unchanged. The portal prints a code such as
+# SIGNALFAIL or ASCENTSUSPEND and publishes no definition for any of them.
 
 # The bands the flight status report groups its stations under. The heading names the
 # pressure the radiosonde reached, so it doubles as the source's own classification of
@@ -70,6 +55,17 @@ PAGE_FURNITURE = {
     "UPPER AIR OBSERVATORY MONITORING SYSTEM",
     "UPPER AIR INSTRUMENTS DIVISION(UAL) - MONITORING SYSTEM",
 }
+
+# Columns the flight status report measures. A row with none of them recorded no ascent.
+MEASURED_COLUMNS = (
+    "flight_duration_minutes",
+    "radiosonde_maximum_height_pressure_hpa",
+    "radiosonde_maximum_height_gpm",
+    "radiowind_maximum_height_pressure_hpa",
+    "radiowind_maximum_height_km",
+    "height_at_100_hpa_gpm",
+    "temperature_at_100_hpa_celsius",
+)
 
 IST_OFFSET = timedelta(hours=5, minutes=30)
 
@@ -175,15 +171,7 @@ def parse_flight_status(markup, day, hour):
             continue
 
         reason = row[9].strip().upper() or "NONE"
-        measurements = {
-            "flight_duration_minutes": _number(row[2]),
-            "radiosonde_maximum_height_pressure_hpa": _number(row[3]),
-            "radiosonde_maximum_height_gpm": _number(row[4]),
-            "radiowind_maximum_height_pressure_hpa": _number(row[5]),
-            "radiowind_maximum_height_km": _number(row[6]),
-            "height_at_100_hpa_gpm": _number(row[7]),
-            "temperature_at_100_hpa_celsius": _number(row[8]),
-        }
+        measurements = dict(zip(MEASURED_COLUMNS, (_number(cell) for cell in row[2:9])))
 
         # A row with nothing in any measured column records an ascent that never
         # happened, and the portal fills its release column with the slot's own clock
@@ -204,7 +192,30 @@ def parse_flight_status(markup, day, hour):
             "ascent_completed": reason == "NONE",
             "report_section": section,
         })
-    return records
+    return _one_row_per_station(records)
+
+
+def _one_row_per_station(records):
+    """Collapses stations the report lists more than once.
+
+    The portal sometimes renders a station's row several times in one report. Most repeats
+    carry identical figures and collapse without loss. A few disagree, and this function
+    keeps the fullest of them: the row holding the most measurements, and the earliest of
+    those when several tie.
+
+    Args:
+        records: Records from one report, in the order the report lists them.
+
+    Returns:
+        The records with one row per station, still in report order.
+    """
+    best = {}
+    for record in records:
+        measured = sum(record[column] is not None for column in MEASURED_COLUMNS)
+        name = record["station_name"]
+        if name not in best or measured > best[name][0]:
+            best[name] = (measured, record)
+    return [record for _, record in best.values()]
 
 
 def parse_ground_status(markup):
@@ -260,7 +271,8 @@ def parse_consumable_stock(markup, day):
             except ValueError:
                 record[column] = None
         records.append(record)
-    return records
+    # The portal repeats a station's row here too, always with identical figures.
+    return list({record["station_name"]: record for record in records}.values())
 
 
 def parse_network_roster(markup):
